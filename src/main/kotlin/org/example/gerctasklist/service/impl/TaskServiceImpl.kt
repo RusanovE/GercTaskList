@@ -2,7 +2,6 @@ package org.example.gerctasklist.service.impl
 
 import jakarta.transaction.Transactional
 import org.example.gerctasklist.dto.TaskDto
-import org.example.gerctasklist.dto.UserDto
 import org.example.gerctasklist.dto.enums.TaskPriority
 import org.example.gerctasklist.dto.enums.TaskStatus
 import org.example.gerctasklist.entities.TaskEntity
@@ -12,7 +11,6 @@ import org.example.gerctasklist.service.TaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import kotlin.jvm.optionals.getOrElse
-import kotlin.jvm.optionals.getOrNull
 
 @Service
 class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskService {
@@ -47,7 +45,7 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
                 TaskEntity(
                     title = taskDto.title,
                     description = taskDto.description,
-                    dueDate = LocalDate.now(),
+                    dueDate = LocalDate.now(), //Todo make variable usefully
                     priority = taskDto.priority?: TaskPriority.MEDIUM,
                     status = taskDto.status?: TaskStatus.UNCOMPLETED,
                     user = existUser
@@ -84,7 +82,7 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
     }
 
     @Transactional
-    override fun deleteTask(userId: Long, taskId: Long): Boolean {
+    override fun deleteTask(userId: Long, taskId: Long): Boolean {  ///Todo optimise return
        try {
            taskRepo.deleteByUserIdAndId(userId, taskId)
            return true
@@ -95,7 +93,7 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
     }
 
     @Transactional
-    override fun updateTaskStatus(userId: Long, taskId: Long, taskStatus: TaskStatus): Boolean {
+    override fun updateTaskStatus(userId: Long, taskId: Long, taskStatus: TaskStatus): Boolean { ///Todo optimise return
         try{
             val existTask = taskRepo.findByUserIdAndId(userId, taskId)
             existTask.status = taskStatus

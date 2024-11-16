@@ -22,7 +22,7 @@ class TaskEntity(
 
     @LastModifiedDate
     @Column(nullable = false)
-    var dueDate: LocalDate,
+    var dueDate: LocalDate, //Todo make variable usefully
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,16 +1,13 @@
 package org.example.gerctasklist.service.impl
 
 import jakarta.transaction.Transactional
-import org.example.gerctasklist.dto.enums.Role
 import org.example.gerctasklist.dto.TaskDto
-import org.example.gerctasklist.dto.enums.TaskPriority
 import org.example.gerctasklist.dto.UserDto
-import org.example.gerctasklist.entities.TaskEntity
+import org.example.gerctasklist.dto.enums.Role
 import org.example.gerctasklist.entities.UserEntity
 import org.example.gerctasklist.repositories.UserRepo
 import org.example.gerctasklist.service.UserService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -64,7 +61,7 @@ class UserServiceImpl(val userRepo: UserRepo) : UserService {
     }
 
     @Transactional
-    override fun deleteUser(id: Long): Boolean {
+    override fun deleteUser(id: Long): Boolean {  ///Todo optimise return
         try {
             userRepo.deleteById(id)
             return true

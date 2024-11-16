@@ -1,7 +1,6 @@
 package org.example.gerctasklist.controller
 
 import org.example.gerctasklist.dto.UserDto
-import org.example.gerctasklist.entities.UserEntity
 import org.example.gerctasklist.service.UserService
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity

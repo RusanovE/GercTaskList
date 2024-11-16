@@ -11,7 +11,7 @@ class UserEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
-    var id: Long? = null,
+    var id: Long? = 0,
 
     @Column(nullable = false)
     var name: String = "",
