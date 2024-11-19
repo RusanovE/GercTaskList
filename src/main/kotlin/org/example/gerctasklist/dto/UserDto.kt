@@ -8,6 +8,4 @@ data class UserDto(
     val name: String,
     var roles: MutableList<Role>,
     var tasks: MutableList<TaskDto>?,
-    ){
-
-}
+    )

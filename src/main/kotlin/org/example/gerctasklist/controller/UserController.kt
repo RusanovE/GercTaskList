@@ -7,9 +7,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping("/users")
 class UserController(val userService: UserService) {
 
-    @GetMapping("/")
+    @GetMapping
     fun getAllUsers(): MutableList<UserDto> {
         return userService.getAll()
     }
@@ -19,19 +20,19 @@ class UserController(val userService: UserService) {
         return ResponseEntity.ok(userService.getUser(id))
     }
 
-    @PostMapping("/addUser")
+    @PostMapping
     fun addUser(@RequestBody userDto: UserDto): ResponseEntity<HttpStatusCode>{
         return if (userService.addUser(userDto)) ResponseEntity.ok(HttpStatusCode.valueOf(200))
         else ResponseEntity(HttpStatusCode.valueOf(403))
     }
 
-    @DeleteMapping("/deleteUser/{id}")
+    @DeleteMapping("/{id}")
     fun deleteUser(@PathVariable id: Long): ResponseEntity<HttpStatusCode>{
         return if (userService.deleteUser(id)) ResponseEntity.ok(HttpStatusCode.valueOf(200))
         else ResponseEntity(HttpStatusCode.valueOf(403))
     }
 
-    @PutMapping("/updateUser/{id}")
+    @PutMapping("/{id}")
     fun updateUser(@PathVariable id: Long, @RequestBody userDto: UserDto): ResponseEntity<HttpStatusCode>{
         return if (userService.updateUser(id, userDto)) ResponseEntity.ok(HttpStatusCode.valueOf(200))
         else ResponseEntity(HttpStatusCode.valueOf(403))

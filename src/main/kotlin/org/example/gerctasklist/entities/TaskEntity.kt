@@ -32,7 +32,7 @@ class TaskEntity(
     @Column(nullable = false)
     var status: TaskStatus = TaskStatus.UNCOMPLETED,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     var user: UserEntity? = null
 )

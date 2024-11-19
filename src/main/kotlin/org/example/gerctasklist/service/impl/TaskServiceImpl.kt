@@ -8,12 +8,17 @@ import org.example.gerctasklist.entities.TaskEntity
 import org.example.gerctasklist.repositories.TaskRepo
 import org.example.gerctasklist.repositories.UserRepo
 import org.example.gerctasklist.service.TaskService
+import org.example.gerctasklist.utill.CsvUtil
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import kotlin.jvm.optionals.getOrElse
 
 @Service
 class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskService {
+
+    @Value("\${stat.filepath}")
+    lateinit var filePath: String
 
     override fun getAllTask(userId: Long): MutableList<TaskDto> {
         return taskRepo.findByUserId(userId).map { taskEntity -> TaskDto(
@@ -22,12 +27,11 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
             taskEntity.description,
             taskEntity.priority,
             taskEntity.status,
-            //taskEntity.user?.let { UserDto(it.id, it.name, it.roles , it.tasks)}!!
 
         ) }.toMutableList()
     }
 
-    override fun getFilterTask(userId: Long, taskStatus: TaskStatus): MutableList<TaskDto> {
+    override fun getFilteredTask(userId: Long, taskStatus: TaskStatus): MutableList<TaskDto> {
         return taskRepo.findByUserIdAndStatus(userId, taskStatus).map { taskEntity -> TaskDto(
             taskEntity.id!!,
             taskEntity.title,
@@ -105,4 +109,50 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
             return false
         }
     }
+
+    override fun getTaskStatistics(): Map<String, Any> {
+        val totalTasks = taskRepo.count()
+        val completedTasks = taskRepo.countByStatus(TaskStatus.COMPLETED)
+        val uncompletedTasks = totalTasks - completedTasks
+
+        val userStats = userRepo.findAll().associate { user ->
+            user.name to (user.tasks?.size ?: 0)
+        }
+
+        return mapOf(
+            "totalTasks" to totalTasks,
+            "completedTasks" to completedTasks,
+            "uncompletedTasks" to uncompletedTasks,
+            "userStats" to userStats
+        )
+    }
+
+    override fun exportStatisticsToCsv(): Boolean {
+        return try {
+            val taskStats = getTaskStatistics()
+            val headers = arrayOf("Metric", "Value")
+            val data = listOf(
+                arrayOf("Total Tasks", taskStats["totalTasks"].toString()),
+                arrayOf("Completed Tasks", taskStats["completedTasks"].toString()),
+                arrayOf("Uncompleted Tasks", taskStats["uncompletedTasks"].toString())
+            )
+
+            CsvUtil.writeCsv(filePath, headers, data)
+
+            // User stats
+            val userHeaders = arrayOf("User", "Task Count")
+            val userData = (taskStats["userStats"] as Map<String, Int>).map {
+                arrayOf(it.key, it.value.toString())
+            }
+
+
+            CsvUtil.writeCsv(filePath.replace(".csv", "_users.csv"), userHeaders, userData)
+
+            true
+        } catch (e: Exception) {
+            println(e.message)
+            false
+        }
+    }
+
 }

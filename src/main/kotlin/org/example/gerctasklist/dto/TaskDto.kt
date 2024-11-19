@@ -9,7 +9,4 @@ data class TaskDto(
     var description: String?,
     var priority: TaskPriority?,
     var status: TaskStatus?,
-    //val user: UserDto,
-) {
-
-}
+)

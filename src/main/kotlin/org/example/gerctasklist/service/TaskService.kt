@@ -7,7 +7,7 @@ interface TaskService {
 
     fun getAllTask(userId: Long): MutableList<TaskDto>
 
-    fun getFilterTask(userId: Long, taskStatus: TaskStatus): MutableList<TaskDto>
+    fun getFilteredTask(userId: Long, taskStatus: TaskStatus): MutableList<TaskDto>
 
     fun addTask(userId: Long, taskDto: TaskDto): Boolean
 
@@ -16,4 +16,6 @@ interface TaskService {
     fun deleteTask(userId: Long, taskId: Long): Boolean
 
     fun updateTaskStatus(userId: Long, taskId: Long, taskStatus: TaskStatus): Boolean
+    fun getTaskStatistics(): Map<String, Any>
+    fun exportStatisticsToCsv(): Boolean
 }

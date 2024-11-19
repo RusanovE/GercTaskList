@@ -15,4 +15,6 @@ interface TaskRepo: JpaRepository<TaskEntity,Long> {
     fun findByUserIdAndId(userId: Long, taskId: Long): TaskEntity
 
     fun deleteByUserIdAndId(userId: Long, taskId: Long)
+
+    fun countByStatus(status: TaskStatus): Int
 }

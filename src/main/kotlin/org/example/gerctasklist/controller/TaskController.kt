@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/users/{userId}/tasks")
 class TaskController(val taskService: TaskService) {
 
-    @GetMapping("/{userId}")
+    @GetMapping
     fun getAllTasks(@PathVariable userId: Long): ResponseEntity<List<TaskDto>> {
         val tasks = taskService.getAllTask(userId)
         return if (tasks.isNotEmpty()) {
@@ -21,12 +21,12 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @GetMapping("/{userId}/filter")
+    @GetMapping("/filter")
     fun getFilteredTasks(
         @PathVariable userId: Long,
         @RequestParam status: TaskStatus
     ): ResponseEntity<List<TaskDto>> {
-        val tasks = taskService.getFilterTask(userId, status)
+        val tasks = taskService.getFilteredTask(userId, status)
         return if (tasks.isNotEmpty()) {
             ResponseEntity.ok(tasks)
         } else {
@@ -34,7 +34,7 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping
     fun addTask(
         @PathVariable userId: Long,
         @RequestBody taskDto: TaskDto
@@ -47,7 +47,7 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @PutMapping("/{userId}/{taskId}")
+    @PutMapping("/{taskId}")
     fun updateTask(
         @PathVariable userId: Long,
         @PathVariable taskId: Long,
@@ -61,7 +61,7 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @DeleteMapping("/{userId}/{taskId}")
+    @DeleteMapping("/{taskId}")
     fun deleteTask(
         @PathVariable userId: Long,
         @PathVariable taskId: Long
@@ -74,7 +74,7 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @PatchMapping("/{userId}/{taskId}/status")
+    @PatchMapping("/{taskId}/status")
     fun updateTaskStatus(
         @PathVariable userId: Long,
         @PathVariable taskId: Long,
