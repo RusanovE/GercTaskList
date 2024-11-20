@@ -13,8 +13,11 @@ class UserEntity(
     @Column(unique = true, nullable = false)
     var id: Long? = 0,
 
-    @Column(nullable = false)
-    var name: String = "",
+    @Column(nullable = false, unique = true)
+    var username: String,
+
+    @Column(name = "password", nullable = false)
+    var password: String,
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = [JoinColumn(name = "user_id")])

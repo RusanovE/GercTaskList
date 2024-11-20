@@ -1,5 +1,7 @@
 package org.example.gerctasklist.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.example.gerctasklist.dto.TaskDto
 import org.example.gerctasklist.dto.enums.TaskStatus
 import org.example.gerctasklist.service.TaskService
@@ -11,6 +13,10 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/users/{userId}/tasks")
 class TaskController(val taskService: TaskService) {
 
+    @Operation(summary = "Получить все задачи пользователя", responses = [
+        ApiResponse(description = "Список задач", responseCode = "200"),
+        ApiResponse(description = "Задачи не найдены", responseCode = "204")
+    ])
     @GetMapping
     fun getAllTasks(@PathVariable userId: Long): ResponseEntity<List<TaskDto>> {
         val tasks = taskService.getAllTask(userId)
@@ -21,6 +27,10 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
+    @Operation(summary = "Получить отфильтрованные задачи по статусу", responses = [
+        ApiResponse(description = "Список отфильтрованных задач", responseCode = "200"),
+        ApiResponse(description = "Задачи не найдены", responseCode = "204")
+    ])
     @GetMapping("/filter")
     fun getFilteredTasks(
         @PathVariable userId: Long,
@@ -34,6 +44,10 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
+    @Operation(summary = "Добавить задачу", responses = [
+        ApiResponse(description = "Задача успешно добавлена", responseCode = "201"),
+        ApiResponse(description = "Ошибка добавления задачи", responseCode = "400")
+    ])
     @PostMapping
     fun addTask(
         @PathVariable userId: Long,
@@ -47,6 +61,10 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
+    @Operation(summary = "Обновить задачу", responses = [
+        ApiResponse(description = "Задача успешно обновлена", responseCode = "200"),
+        ApiResponse(description = "Ошибка обновления задачи", responseCode = "404")
+    ])
     @PutMapping("/{taskId}")
     fun updateTask(
         @PathVariable userId: Long,
@@ -61,6 +79,10 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
+    @Operation(summary = "Удалить задачу", responses = [
+        ApiResponse(description = "Задача успешно удалена", responseCode = "200"),
+        ApiResponse(description = "Ошибка удаления задачи", responseCode = "404")
+    ])
     @DeleteMapping("/{taskId}")
     fun deleteTask(
         @PathVariable userId: Long,
@@ -74,6 +96,10 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
+    @Operation(summary = "Обновить статус задачи", responses = [
+        ApiResponse(description = "Статус задачи успешно обновлен", responseCode = "200"),
+        ApiResponse(description = "Ошибка обновления статуса задачи", responseCode = "404")
+    ])
     @PatchMapping("/{taskId}/status")
     fun updateTaskStatus(
         @PathVariable userId: Long,

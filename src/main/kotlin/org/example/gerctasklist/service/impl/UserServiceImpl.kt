@@ -7,16 +7,18 @@ import org.example.gerctasklist.dto.enums.Role
 import org.example.gerctasklist.entities.UserEntity
 import org.example.gerctasklist.repositories.UserRepo
 import org.example.gerctasklist.service.UserService
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrNull
 
 @Service
-class UserServiceImpl(val userRepo: UserRepo) : UserService {
+class UserServiceImpl(val userRepo: UserRepo, val passwordEncoder: PasswordEncoder) : UserService {
 
     override fun getAll(): MutableList<UserDto> {
         return userRepo.findAll().map { userEntity -> UserDto(
             userEntity.id!!,
-            userEntity.name,
+            userEntity.username,
+            userEntity.password,
             userEntity.roles,
             userEntity.tasks?.map { taskEntity -> TaskDto(
                 taskEntity.id!!,
@@ -33,7 +35,8 @@ class UserServiceImpl(val userRepo: UserRepo) : UserService {
         val existUser = userRepo.findById(id)
         return UserDto(
             existUser.get().id!!,
-            existUser.get().name,
+            existUser.get().username,
+            existUser.get().password,
             existUser.get().roles,
             existUser.get().tasks?.map { taskEntity -> TaskDto(
                 taskEntity.id!!,
@@ -50,12 +53,13 @@ class UserServiceImpl(val userRepo: UserRepo) : UserService {
        try {
            userRepo.save(
                UserEntity(
-                   name = userDto.name,
+                   username = userDto.username,
+                   password = passwordEncoder.encode(userDto.password),
                    roles = userDto.roles as ArrayList<Role>,
                    tasks = mutableListOf()))
-
            return true
        } catch (e: Exception) {
+           println(e.message)
            return false
        }
     }
@@ -74,19 +78,12 @@ class UserServiceImpl(val userRepo: UserRepo) : UserService {
 
     @Transactional
     override fun updateUser(id: Long, userDto: UserDto): Boolean {
-
-        try{
-            val existUser = userRepo.findById(id)
-            existUser.apply {
-                existUser.get().name = userDto.name
-                existUser.get().roles = userDto.roles
-            }
-
-            userRepo.save(existUser.getOrNull()?: return false)
-            return true
-        }catch (e: Exception){
-            println(e.message)
-            return false
+        val existUser = userRepo.findById(id).getOrNull() ?: return false
+        existUser.apply {
+            username = userDto.username
+            roles.add(Role.ROLE_ADMIN)
         }
+        userRepo.save(existUser)
+        return true
     }
 }

@@ -12,7 +12,7 @@ class TaskEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, unique = true)
-    var id: Long? = null,
+    var id: Long? = 0,
 
     @Column(nullable = false)
     var title: String = "",

@@ -81,8 +81,6 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
             println(e.message)
             return false
         }
-
-
     }
 
     @Transactional
@@ -116,7 +114,7 @@ class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskServ
         val uncompletedTasks = totalTasks - completedTasks
 
         val userStats = userRepo.findAll().associate { user ->
-            user.name to (user.tasks?.size ?: 0)
+            user.username to (user.tasks?.size ?: 0)
         }
 
         return mapOf(
