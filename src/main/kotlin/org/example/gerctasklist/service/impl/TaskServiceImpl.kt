@@ -1,155 +1,98 @@
 package org.example.gerctasklist.service.impl
 
 import jakarta.transaction.Transactional
+import org.example.gerctasklist.dto.ErrorDTO
 import org.example.gerctasklist.dto.TaskDto
 import org.example.gerctasklist.dto.enums.TaskPriority
 import org.example.gerctasklist.dto.enums.TaskStatus
-import org.example.gerctasklist.entities.TaskEntity
 import org.example.gerctasklist.repositories.TaskRepo
 import org.example.gerctasklist.repositories.UserRepo
 import org.example.gerctasklist.service.TaskService
-import org.example.gerctasklist.utill.CsvUtil
-import org.springframework.beans.factory.annotation.Value
+import org.example.gerctasklist.service.UserService
+import org.example.gerctasklist.utill.ObjMapper
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import kotlin.jvm.optionals.getOrElse
+import java.util.*
 
 @Service
-class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo) : TaskService {
+class TaskServiceImpl(val taskRepo: TaskRepo, val userRepo: UserRepo, val userService: UserService, val mapper: ObjMapper) : TaskService {
 
-    @Value("\${stat.filepath}")
-    lateinit var filePath: String
+    override fun getAllUserTask(): MutableList<TaskDto> {
+        val userId = userService.getCurrentUserId()
 
-    override fun getAllTask(userId: Long): MutableList<TaskDto> {
-        return taskRepo.findByUserId(userId).map { taskEntity -> TaskDto(
-            taskEntity.id!!,
-            taskEntity.title,
-            taskEntity.description,
-            taskEntity.priority,
-            taskEntity.status,
-
-        ) }.toMutableList()
+        return taskRepo.findByUserId(userId)
+            .map { taskEntity -> mapper.toTaskDto(taskEntity) }
+            .toMutableList()
     }
 
-    override fun getFilteredTask(userId: Long, taskStatus: TaskStatus): MutableList<TaskDto> {
-        return taskRepo.findByUserIdAndStatus(userId, taskStatus).map { taskEntity -> TaskDto(
-            taskEntity.id!!,
-            taskEntity.title,
-            taskEntity.description,
-            taskEntity.priority,
-            taskEntity.status,
-        ) }.toMutableList()
-    }
+    override fun getFilteredTask(taskStatus: TaskStatus): MutableList<TaskDto> {
+        val userId = userService.getCurrentUserId()
 
-    override fun addTask(userId: Long, taskDto: TaskDto): Boolean {
-        val existUser = userRepo.findById(userId).getOrElse { return false }
-
-        try{
-            taskRepo.save(
-                TaskEntity(
-                    title = taskDto.title,
-                    description = taskDto.description,
-                    dueDate = LocalDate.now(), //Todo make variable usefully
-                    priority = taskDto.priority?: TaskPriority.MEDIUM,
-                    status = taskDto.status?: TaskStatus.UNCOMPLETED,
-                    user = existUser
-                )
-            )
-
-            return true
-        }catch (e: Exception){
-            println(e.message)
-            return false
-        }
-
+        return taskRepo.findByUserIdAndStatus(userId, taskStatus)
+            .map { taskEntity -> mapper.toTaskDto(taskEntity) }
+            .toMutableList()
     }
 
     @Transactional
-    override fun updateTask(userId: Long, taskId: Long, taskDto: TaskDto): Boolean {
-        val existTask = taskRepo.findByUserIdAndId(userId, taskId)
+    override fun addTask(taskDto: TaskDto): ResponseEntity<*> {
+        val userId = userService.getCurrentUserId()
+        val existUser = userRepo.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(404).body(ErrorDTO(404, "User not found", Date()))
 
-        try{
+        return try {
+            val taskEntity = mapper.toTaskEntity(taskDto, existUser)
+            taskRepo.save(taskEntity)
+            ResponseEntity.ok("Task added successfully")
+        } catch (e: Exception) {
+            ResponseEntity.status(500).body(ErrorDTO(500, "Failed to add task", Date()))
+        }
+    }
+
+    @Transactional
+    override fun updateTask(taskId: Long, taskDto: TaskDto, userId: Long?): ResponseEntity<*> {
+        val resolvedUserId = userId ?: userService.getCurrentUserId()
+        val existTask = taskRepo.findByUserIdAndId(resolvedUserId, taskId)
+            ?: return ResponseEntity.status(404).body(ErrorDTO(404, "Task not found", Date()))
+
+        return try {
             taskRepo.save(existTask.apply {
                 title = taskDto.title
                 description = taskDto.description ?: ""
-                status = taskDto.status ?: TaskStatus.UNCOMPLETED
                 priority = taskDto.priority ?: TaskPriority.MEDIUM
             })
-
-            return true
-        }catch (e: Exception){
-            println(e.message)
-            return false
-        }
-    }
-
-    @Transactional
-    override fun deleteTask(userId: Long, taskId: Long): Boolean {  ///Todo optimise return
-       try {
-           taskRepo.deleteByUserIdAndId(userId, taskId)
-           return true
-       } catch (e: Exception){
-           println(e.message)
-           return false
-       }
-    }
-
-    @Transactional
-    override fun updateTaskStatus(userId: Long, taskId: Long, taskStatus: TaskStatus): Boolean { ///Todo optimise return
-        try{
-            val existTask = taskRepo.findByUserIdAndId(userId, taskId)
-            existTask.status = taskStatus
-            taskRepo.save(existTask)
-            return true
-
-        }catch (e: Exception){
-            println(e.message)
-            return false
-        }
-    }
-
-    override fun getTaskStatistics(): Map<String, Any> {
-        val totalTasks = taskRepo.count()
-        val completedTasks = taskRepo.countByStatus(TaskStatus.COMPLETED)
-        val uncompletedTasks = totalTasks - completedTasks
-
-        val userStats = userRepo.findAll().associate { user ->
-            user.username to (user.tasks?.size ?: 0)
-        }
-
-        return mapOf(
-            "totalTasks" to totalTasks,
-            "completedTasks" to completedTasks,
-            "uncompletedTasks" to uncompletedTasks,
-            "userStats" to userStats
-        )
-    }
-
-    override fun exportStatisticsToCsv(): Boolean {
-        return try {
-            val taskStats = getTaskStatistics()
-            val headers = arrayOf("Metric", "Value")
-            val data = listOf(
-                arrayOf("Total Tasks", taskStats["totalTasks"].toString()),
-                arrayOf("Completed Tasks", taskStats["completedTasks"].toString()),
-                arrayOf("Uncompleted Tasks", taskStats["uncompletedTasks"].toString())
-            )
-
-            CsvUtil.writeCsv(filePath, headers, data)
-
-            // User stats
-            val userHeaders = arrayOf("User", "Task Count")
-            val userData = (taskStats["userStats"] as Map<String, Int>).map {
-                arrayOf(it.key, it.value.toString())
-            }
-
-
-            CsvUtil.writeCsv(filePath.replace(".csv", "_users.csv"), userHeaders, userData)
-
-            true
+            ResponseEntity.ok("Task updated successfully")
         } catch (e: Exception) {
-            println(e.message)
-            false
+            ResponseEntity.status(500).body(ErrorDTO(500, "Failed to update task", Date()))
+        }
+    }
+
+    @Transactional
+    override fun deleteTask(taskId: Long, userId: Long?): ResponseEntity<*> {
+        val resolvedUserId = userId ?: userService.getCurrentUserId()
+        return try {
+            val rowsDeleted = taskRepo.deleteByUserIdAndId(resolvedUserId, taskId)
+            if (rowsDeleted == 0) {
+                ResponseEntity.status(404).body(ErrorDTO(404, "Task not found", Date()))
+            } else {
+                ResponseEntity.ok("Task deleted successfully")
+            }
+        } catch (e: Exception) {
+            ResponseEntity.status(500).body(ErrorDTO(500, "Failed to delete task", Date()))
+        }
+    }
+
+    @Transactional
+    override fun updateTaskStatus(taskId: Long): ResponseEntity<*> {
+        val userId =  userService.getCurrentUserId()
+        val existTask = taskRepo.findByUserIdAndId(userId, taskId)
+            ?: return ResponseEntity.status(404).body(ErrorDTO(404, "Task not found", Date()))
+
+        return try {
+            existTask.status = TaskStatus.COMPLETED
+            taskRepo.save(existTask)
+            ResponseEntity.ok("Task status updated successfully")
+        } catch (e: Exception) {
+            ResponseEntity.status(500).body(ErrorDTO(500, "Failed to update task status", Date()))
         }
     }
 

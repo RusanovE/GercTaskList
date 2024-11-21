@@ -1,6 +1,5 @@
 package org.example.gerctasklist.config
 
-
 import org.example.gerctasklist.service.impl.CustomUserDetailsServiceImpl
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -29,7 +28,7 @@ class SecurityConfig(
     @Bean
     @Throws(java.lang.Exception::class)
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.csrf { obj: CsrfConfigurer<HttpSecurity> -> obj.disable() } // Своего рода отключение CORS (разрешение запросов со всех доменов)
+        http.csrf { obj: CsrfConfigurer<HttpSecurity> -> obj.disable() }
             .cors { cors: CorsConfigurer<HttpSecurity?> ->
                 cors.configurationSource {
                     val corsConfiguration = CorsConfiguration()
@@ -45,12 +44,12 @@ class SecurityConfig(
                     corsConfiguration.allowCredentials = true
                     corsConfiguration
                 }
-            } // Настройка доступа к конечным точкам
+            }
             .authorizeHttpRequests { request ->
-                request // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
-                    .requestMatchers("/users/login", "/users/signUp").permitAll()
-                    .requestMatchers("/users/**").hasRole("USER")
-                    //.requestMatchers("/users/stat/export").hasRole("ADMIN")
+                request
+                    .requestMatchers("/users/login", "/users/signUp", "/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/users/tasks/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             .sessionManagement { manager: SessionManagementConfigurer<HttpSecurity?> ->

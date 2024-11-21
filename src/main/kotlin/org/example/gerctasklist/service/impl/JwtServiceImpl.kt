@@ -3,18 +3,20 @@ package org.example.gerctasklist.service.impl
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.security.Keys
 import org.example.gerctasklist.service.JwtService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
+import java.security.Key
 import java.time.Duration
 import java.util.*
 import java.util.stream.Collectors
 
-
 @Service
-class JwtServiceImpl(): JwtService{
+class JwtServiceImpl: JwtService{
 
     @Value("\${jwt.secret}")
     private val secret: String? = null
@@ -44,16 +46,18 @@ class JwtServiceImpl(): JwtService{
         return getAllClaimsFromToken(token).subject
     }
 
-    override fun getRoles(token: String?): List<*> {
-        return getAllClaimsFromToken(token!!).get<List<*>>("roles", List::class.java)
+    override fun getRoles(token: String?): List<String> {
+        return getAllClaimsFromToken(token!!).get("roles", List::class.java) as List<String>
     }
 
 
     private fun getAllClaimsFromToken(token: String): Claims {
-    return Jwts.parser()
-        .setSigningKey(secret)
-        .parseClaimsJws(token)
-        .body
+        return Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(token).body;
+    }
+
+    private fun getSigningKey(): Key {
+        val keyBytes = Decoders.BASE64.decode(secret)
+        return Keys.hmacShaKeyFor(keyBytes)
     }
 
 }

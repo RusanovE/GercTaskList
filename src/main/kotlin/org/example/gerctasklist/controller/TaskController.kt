@@ -5,21 +5,27 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.example.gerctasklist.dto.TaskDto
 import org.example.gerctasklist.dto.enums.TaskStatus
 import org.example.gerctasklist.service.TaskService
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/users/{userId}/tasks")
+@RequestMapping("/users/tasks")
 class TaskController(val taskService: TaskService) {
 
-    @Operation(summary = "Получить все задачи пользователя", responses = [
-        ApiResponse(description = "Список задач", responseCode = "200"),
-        ApiResponse(description = "Задачи не найдены", responseCode = "204")
-    ])
+    /**
+     * Endpoint to get all tasks for a user.
+     */
+    @Operation(
+        summary = "Get all tasks for the user",
+        description = "Retrieves a list of all tasks associated with the current user.",
+        responses = [
+            ApiResponse(description = "List of tasks", responseCode = "200"),
+            ApiResponse(description = "No tasks found", responseCode = "204")
+        ]
+    )
     @GetMapping
-    fun getAllTasks(@PathVariable userId: Long): ResponseEntity<List<TaskDto>> {
-        val tasks = taskService.getAllTask(userId)
+    fun getAllTasks(): ResponseEntity<List<TaskDto>> {
+        val tasks = taskService.getAllUserTask()
         return if (tasks.isNotEmpty()) {
             ResponseEntity.ok(tasks)
         } else {
@@ -27,16 +33,20 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @Operation(summary = "Получить отфильтрованные задачи по статусу", responses = [
-        ApiResponse(description = "Список отфильтрованных задач", responseCode = "200"),
-        ApiResponse(description = "Задачи не найдены", responseCode = "204")
-    ])
+    /**
+     * Endpoint to get tasks filtered by status.
+     */
+    @Operation(
+        summary = "Get filtered tasks by status",
+        description = "Retrieves a list of tasks for the user filtered by their status.",
+        responses = [
+            ApiResponse(description = "Filtered list of tasks", responseCode = "200"),
+            ApiResponse(description = "No tasks found", responseCode = "204")
+        ]
+    )
     @GetMapping("/filter")
-    fun getFilteredTasks(
-        @PathVariable userId: Long,
-        @RequestParam status: TaskStatus
-    ): ResponseEntity<List<TaskDto>> {
-        val tasks = taskService.getFilteredTask(userId, status)
+    fun getFilteredTasks(@RequestParam status: TaskStatus): ResponseEntity<List<TaskDto>> {
+        val tasks = taskService.getFilteredTask(status)
         return if (tasks.isNotEmpty()) {
             ResponseEntity.ok(tasks)
         } else {
@@ -44,73 +54,67 @@ class TaskController(val taskService: TaskService) {
         }
     }
 
-    @Operation(summary = "Добавить задачу", responses = [
-        ApiResponse(description = "Задача успешно добавлена", responseCode = "201"),
-        ApiResponse(description = "Ошибка добавления задачи", responseCode = "400")
-    ])
-    @PostMapping
-    fun addTask(
-        @PathVariable userId: Long,
-        @RequestBody taskDto: TaskDto
-    ): ResponseEntity<String> {
-        val isAdded = taskService.addTask(userId, taskDto)
-        return if (isAdded) {
-            ResponseEntity.status(HttpStatus.CREATED).body("Task added successfully")
-        } else {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to add task")
-        }
+    /**
+     * Endpoint to add a new task.
+     */
+    @Operation(
+        summary = "Add a new task",
+        description = "Allows the user to create a new task by providing task details.",
+        responses = [
+            ApiResponse(description = "Task successfully added", responseCode = "201"),
+            ApiResponse(description = "Failed to add task", responseCode = "400")
+        ]
+    )
+    @PostMapping("/add")
+    fun addTask(@RequestBody taskDto: TaskDto): ResponseEntity<*> {
+        return taskService.addTask(taskDto)
     }
 
-    @Operation(summary = "Обновить задачу", responses = [
-        ApiResponse(description = "Задача успешно обновлена", responseCode = "200"),
-        ApiResponse(description = "Ошибка обновления задачи", responseCode = "404")
-    ])
-    @PutMapping("/{taskId}")
-    fun updateTask(
-        @PathVariable userId: Long,
-        @PathVariable taskId: Long,
-        @RequestBody taskDto: TaskDto
-    ): ResponseEntity<String> {
-        val isUpdated = taskService.updateTask(userId, taskId, taskDto)
-        return if (isUpdated) {
-            ResponseEntity.ok("Task updated successfully")
-        } else {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found or update failed")
-        }
+    /**
+     * Endpoint to update an existing task.
+     */
+    @Operation(
+        summary = "Update an existing task",
+        description = "Updates the details of a specific task by its ID.",
+        responses = [
+            ApiResponse(description = "Task successfully updated", responseCode = "200"),
+            ApiResponse(description = "Task not found", responseCode = "404")
+        ]
+    )
+    @PutMapping("/upd/{taskId}")
+    fun updateTask(@PathVariable taskId: Long, @RequestBody taskDto: TaskDto): ResponseEntity<*> {
+        return taskService.updateTask(taskId, taskDto)
     }
 
-    @Operation(summary = "Удалить задачу", responses = [
-        ApiResponse(description = "Задача успешно удалена", responseCode = "200"),
-        ApiResponse(description = "Ошибка удаления задачи", responseCode = "404")
-    ])
-    @DeleteMapping("/{taskId}")
-    fun deleteTask(
-        @PathVariable userId: Long,
-        @PathVariable taskId: Long
-    ): ResponseEntity<String> {
-        val isDeleted = taskService.deleteTask(userId, taskId)
-        return if (isDeleted) {
-            ResponseEntity.ok("Task deleted successfully")
-        } else {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found or delete failed")
-        }
+    /**
+     * Endpoint to delete a task.
+     */
+    @Operation(
+        summary = "Delete a task",
+        description = "Deletes a task by its ID.",
+        responses = [
+            ApiResponse(description = "Task successfully deleted", responseCode = "200"),
+            ApiResponse(description = "Task not found", responseCode = "404")
+        ]
+    )
+    @DeleteMapping("/del/{taskId}")
+    fun deleteTask(@PathVariable taskId: Long): ResponseEntity<*> {
+        return taskService.deleteTask(taskId)
     }
 
-    @Operation(summary = "Обновить статус задачи", responses = [
-        ApiResponse(description = "Статус задачи успешно обновлен", responseCode = "200"),
-        ApiResponse(description = "Ошибка обновления статуса задачи", responseCode = "404")
-    ])
-    @PatchMapping("/{taskId}/status")
-    fun updateTaskStatus(
-        @PathVariable userId: Long,
-        @PathVariable taskId: Long,
-        @RequestParam status: TaskStatus
-    ): ResponseEntity<String> {
-        val isStatusUpdated = taskService.updateTaskStatus(userId, taskId, status)
-        return if (isStatusUpdated) {
-            ResponseEntity.ok("Task status updated successfully")
-        } else {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found or update failed")
-        }
+    /**
+     * Endpoint to update the status of a task.
+     */
+    @Operation(
+        summary = "Update the status of a task",
+        description = "Updates the status of a specific task by its ID.",
+        responses = [
+            ApiResponse(description = "Task status successfully updated", responseCode = "200"),
+            ApiResponse(description = "Task not found", responseCode = "404")
+        ]
+    )
+    @PatchMapping("/{taskId}/upd-status")
+    fun updateTaskStatus(@PathVariable taskId: Long): ResponseEntity<*> {
+        return taskService.updateTaskStatus(taskId)
     }
 }

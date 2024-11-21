@@ -8,5 +8,5 @@ interface JwtService {
 
     fun getUsername(token: String): String
 
-    fun getRoles(token: String?): List<*>
+    fun getRoles(token: String?): List<String>
 }

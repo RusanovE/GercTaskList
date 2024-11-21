@@ -4,7 +4,6 @@ import jakarta.persistence.*
 import org.example.gerctasklist.dto.enums.TaskPriority
 import org.example.gerctasklist.dto.enums.TaskStatus
 import org.springframework.data.annotation.LastModifiedDate
-import java.time.LocalDate
 
 @Entity
 @Table(name = "tasks")
@@ -15,14 +14,14 @@ class TaskEntity(
     var id: Long? = 0,
 
     @Column(nullable = false)
-    var title: String = "",
+    var title: String = "task title",
 
     @Column(columnDefinition = "TEXT")
-    var description: String? = "",
+    var description: String? = "null",
 
     @LastModifiedDate
     @Column(nullable = false)
-    var dueDate: LocalDate, //Todo make variable usefully
+    var deadLine: String? = "No time limit",
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

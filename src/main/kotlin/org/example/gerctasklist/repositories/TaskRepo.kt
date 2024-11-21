@@ -12,9 +12,9 @@ interface TaskRepo: JpaRepository<TaskEntity,Long> {
 
     fun findByUserIdAndStatus(userId: Long, taskStatus: TaskStatus): MutableList<TaskEntity>
 
-    fun findByUserIdAndId(userId: Long, taskId: Long): TaskEntity
+    fun findByUserIdAndId(userId: Long, taskId: Long): TaskEntity?
 
-    fun deleteByUserIdAndId(userId: Long, taskId: Long)
+    fun deleteByUserIdAndId(userId: Long, taskId: Long): Int
 
     fun countByStatus(status: TaskStatus): Int
 }

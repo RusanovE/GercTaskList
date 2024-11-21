@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import mu.KotlinLogging
 import org.example.gerctasklist.service.JwtService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -17,6 +18,7 @@ import java.util.stream.Collectors
 @Component
 class JwtRequestFilter(val jwtService: JwtService) : OncePerRequestFilter() {
 
+    private final val log = KotlinLogging.logger {}
 
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(
@@ -32,7 +34,7 @@ class JwtRequestFilter(val jwtService: JwtService) : OncePerRequestFilter() {
             try {
                 username = jwtService.getUsername(jwt)
             } catch (e: ExpiredJwtException) {
-                //log.info("Время жизни токена вышло")
+                log.info("Token lifetime expired, Exception: ${e.message}")
             }
         }
         if (username != null && SecurityContextHolder.getContext().authentication == null) {

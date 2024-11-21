@@ -7,24 +7,58 @@ import jakarta.validation.constraints.Size
 import org.example.gerctasklist.dto.enums.TaskPriority
 import org.example.gerctasklist.dto.enums.TaskStatus
 
+/**
+ * Data Transfer Object (DTO) representing a task.
+ * This DTO is used for transferring task data between different layers of the application.
+ */
 @Schema(description = "Task data transfer object")
 data class TaskDto(
+
+    /**
+     * The unique identifier of the task.
+     * This field is read-only and cannot be null.
+     */
     @Schema(description = "Task ID", example = "101", accessMode = Schema.AccessMode.READ_ONLY)
     @NotNull(message = "Id cannot be null")
-    val id: Long? = 0, ///Todo delete id from dto
+    val id: Long? = 0,
 
+    /**
+     * The title of the task.
+     * This field is required and cannot be empty.
+     * The title must be between 3 and 100 characters long.
+     */
     @Schema(description = "Title of the task", example = "Complete project documentation")
     @NotBlank(message = "Title cannot be blank")
     @Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")
     val title: String,
 
+    /**
+     * The description of the task.
+     * This field is optional and may be left empty.
+     * The description must not exceed 500 characters.
+     */
     @Schema(description = "Description of the task", example = "Write detailed project documentation", nullable = true)
     @Size(max = 500, message = "Description must not exceed 500 characters")
-    var description: String? = null,
+    var description: String? = "null",
 
+    /**
+     * The deadline for the task.
+     * This field is optional and has a default value of "No time limit" if not provided.
+     */
+    @Schema(description = "Deadline of the task", example = "2024-12-31")
+    val deadLine: String? = "No time limit",
+
+    /**
+     * The priority of the task.
+     * This field is optional and defaults to "MEDIUM".
+     */
     @Schema(description = "Priority of the task", example = "HIGH")
-    var priority: TaskPriority? = null,
+    var priority: TaskPriority? = TaskPriority.MEDIUM,
 
+    /**
+     * The status of the task.
+     * This field is optional and defaults to "UNCOMPLETED".
+     */
     @Schema(description = "Status of the task", example = "COMPLETED")
-    var status: TaskStatus? = null
+    var status: TaskStatus? = TaskStatus.UNCOMPLETED
 )

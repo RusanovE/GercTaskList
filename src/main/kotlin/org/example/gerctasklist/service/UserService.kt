@@ -1,16 +1,21 @@
 package org.example.gerctasklist.service
 
+import org.example.gerctasklist.dto.SignRequestDto
 import org.example.gerctasklist.dto.UserDto
+import org.example.gerctasklist.entities.UserEntity
+import org.springframework.http.ResponseEntity
 
 interface  UserService{
 
     fun getAll(): MutableList<UserDto>
 
-    fun getUser(id: Long): UserDto
+    fun getUser(username: String): UserEntity
 
-    fun addUser(userDto: UserDto): Boolean
+    fun getCurrentUserId(): Long
 
-    fun deleteUser(id: Long): Boolean
+    fun addUser(signRequestDto: SignRequestDto): ResponseEntity<*>
 
-    fun updateUser(id: Long, userDto: UserDto): Boolean
+    fun deleteUser(id: Long): ResponseEntity<*>
+
+    fun updateUser(id: Long, userDto: UserDto): ResponseEntity<*>
 }

@@ -2,20 +2,20 @@ package org.example.gerctasklist.service
 
 import org.example.gerctasklist.dto.TaskDto
 import org.example.gerctasklist.dto.enums.TaskStatus
+import org.springframework.http.ResponseEntity
 
 interface TaskService {
 
-    fun getAllTask(userId: Long): MutableList<TaskDto>
+    fun getAllUserTask(): MutableList<TaskDto>
 
-    fun getFilteredTask(userId: Long, taskStatus: TaskStatus): MutableList<TaskDto>
+    fun getFilteredTask( taskStatus: TaskStatus): MutableList<TaskDto>
 
-    fun addTask(userId: Long, taskDto: TaskDto): Boolean
+    fun addTask( taskDto: TaskDto): ResponseEntity<*>
 
-    fun updateTask(userId: Long, taskId: Long, taskDto: TaskDto ): Boolean
+    fun updateTask(taskId: Long, taskDto: TaskDto, userId: Long? = null, ): ResponseEntity<*>
 
-    fun deleteTask(userId: Long, taskId: Long): Boolean
+    fun deleteTask(taskId: Long, userId: Long? = null): ResponseEntity<*>
 
-    fun updateTaskStatus(userId: Long, taskId: Long, taskStatus: TaskStatus): Boolean
-    fun getTaskStatistics(): Map<String, Any>
-    fun exportStatisticsToCsv(): Boolean
+    fun updateTaskStatus( taskId: Long): ResponseEntity<*>
+
 }

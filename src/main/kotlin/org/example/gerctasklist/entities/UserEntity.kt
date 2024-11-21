@@ -26,7 +26,7 @@ class UserEntity(
     var roles: MutableList<Role> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.LAZY)
-    var tasks: MutableList<TaskEntity>?
+    var tasks: MutableList<TaskEntity>? = mutableListOf()
 
 ){
     override fun equals(other: Any?): Boolean {
