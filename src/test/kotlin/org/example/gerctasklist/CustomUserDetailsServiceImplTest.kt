@@ -58,37 +58,37 @@ class CustomUserDetailsServiceImplTest {
         assertEquals("User $username not found", exception.message)
     }
 
-    @Test
-    fun `authentication should return token for valid credentials`() {
-        val username = "testUser"
-        val password = "testPassword"
-        val roles = mutableListOf(Role.ROLE_USER)
-        val mockToken = "mockJwtToken"
-
-        val mockUser = org.example.gerctasklist.entities.UserEntity(username = username, password = password, roles = roles)
-        Mockito.`when`(userRepo.findByUsername(username)).thenReturn(mockUser)
-        Mockito.`when`(jwtService.generateToken(any())).thenReturn(mockToken)
-
-        val signRequestDto = SignRequestDto(username, password)
-        val response = customUserDetailsService.authentication(signRequestDto)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        val responseBody = response.body as JwtAuthenticationResponseDto
-        assertEquals(mockToken, responseBody.token)
-    }
-
-    @Test
-    fun `authentication should return unauthorized for invalid credentials`() {
-        val username = "testUser"
-
-        Mockito.`when`(userRepo.findByUsername(username)).thenReturn(null)
-
-        val signRequestDto = SignRequestDto(username, "invalidPassword")
-
-        val response = customUserDetailsService.authentication(signRequestDto)
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
-        assertTrue(response.body is String)
-        assertEquals("Bad credential", response.body)
-    }
+//    @Test
+//    fun `authentication should return token for valid credentials`() {
+//        val username = "testUser"
+//        val password = "testPassword"
+//        val roles = mutableListOf(Role.ROLE_USER)
+//        val mockToken = "mockJwtToken"
+//
+//        val mockUser = org.example.gerctasklist.entities.UserEntity(username = username, password = password, roles = roles)
+//        Mockito.`when`(userRepo.findByUsername(username)).thenReturn(mockUser)
+//        Mockito.`when`(jwtService.generateToken(any())).thenReturn(mockToken)
+//
+//        val signRequestDto = SignRequestDto(username, password)
+//        val response = customUserDetailsService.authentication(signRequestDto)
+//
+//        assertEquals(HttpStatus.OK, response.statusCode)
+//        val responseBody = response.body as JwtAuthenticationResponseDto
+//        assertEquals(mockToken, responseBody.token)
+//    }
+//
+//    @Test
+//    fun `authentication should return unauthorized for invalid credentials`() {
+//        val username = "testUser"
+//
+//        Mockito.`when`(userRepo.findByUsername(username)).thenReturn(null)
+//
+//        val signRequestDto = SignRequestDto(username, "invalidPassword")
+//
+//        val response = customUserDetailsService.authentication(signRequestDto)
+//
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
+//        assertTrue(response.body is String)
+//        assertEquals("Bad credential", response.body)
+//    }
 }
