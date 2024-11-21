@@ -18,8 +18,7 @@ data class TaskDto(
      * The unique identifier of the task.
      * This field is read-only and cannot be null.
      */
-    @Schema(description = "Task ID", example = "101", accessMode = Schema.AccessMode.READ_ONLY)
-    @NotNull(message = "Id cannot be null")
+    @Schema(description = "Task ID", accessMode = Schema.AccessMode.READ_ONLY, nullable = true)
     val id: Long? = 0,
 
     /**
@@ -27,7 +26,7 @@ data class TaskDto(
      * This field is required and cannot be empty.
      * The title must be between 3 and 100 characters long.
      */
-    @Schema(description = "Title of the task", example = "Complete project documentation")
+    @Schema(description = "Title of the task", example = "Complete project documentation", nullable = false)
     @NotBlank(message = "Title cannot be blank")
     @Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")
     val title: String,
@@ -52,13 +51,13 @@ data class TaskDto(
      * The priority of the task.
      * This field is optional and defaults to "MEDIUM".
      */
-    @Schema(description = "Priority of the task", example = "HIGH")
+    @Schema(description = "Priority of the task")
     var priority: TaskPriority? = TaskPriority.MEDIUM,
 
     /**
      * The status of the task.
      * This field is optional and defaults to "UNCOMPLETED".
      */
-    @Schema(description = "Status of the task", example = "COMPLETED")
+    @Schema(description = "Status of the task")
     var status: TaskStatus? = TaskStatus.UNCOMPLETED
 )

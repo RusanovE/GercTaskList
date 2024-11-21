@@ -17,7 +17,7 @@ data class UserDto(
      * The unique identifier of the user.
      * This field is read-only and cannot be null.
      */
-    @Schema(description = "User ID", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(description = "User ID", accessMode = Schema.AccessMode.READ_ONLY, nullable = true)
     val id: Long? = 0,
 
     /**
@@ -25,7 +25,7 @@ data class UserDto(
      * This field is required and cannot be blank.
      * The username must be between 3 and 50 characters long.
      */
-    @Schema(description = "Username of the user", example = "john_doe")
+    @Schema(description = "Username of the user", example = "john_doe", nullable = false)
     @NotBlank(message = "Username cannot be blank")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     val username: String,
@@ -34,8 +34,7 @@ data class UserDto(
      * A list of roles assigned to the user.
      * This field is required and cannot be null.
      */
-    @Schema(description = "Roles assigned to the user")
-    @NotNull(message = "Roles cannot be null")
+    @Schema(description = "Roles assigned to the user", nullable = true)
     var roles: MutableList<Role>? = null,
 
     /**

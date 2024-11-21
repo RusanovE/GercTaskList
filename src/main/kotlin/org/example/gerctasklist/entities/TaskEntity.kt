@@ -9,7 +9,8 @@ import org.springframework.data.annotation.LastModifiedDate
 @Table(name = "tasks")
 class TaskEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_id_seq")
+    @SequenceGenerator(name = "task_id_seq", sequenceName = "task_id_seq", allocationSize = 1)
     @Column(nullable = false, unique = true)
     var id: Long? = 0,
 
